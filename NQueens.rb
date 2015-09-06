@@ -1,6 +1,5 @@
 require 'colorize'
 require 'set'
-require 'benchmark'
 
 class NQueens
 
