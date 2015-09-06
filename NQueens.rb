@@ -1,4 +1,4 @@
-
+require 'colorize'
 class NQueens
 
   def initialize(n = 8)
@@ -9,7 +9,7 @@ class NQueens
     @unsafe_pos = []
   end
 
-  attr_reader :n
+  attr_reader :n, :solutions
 
   def solve(row = 0)
     if row >= n
@@ -67,13 +67,13 @@ class NQueens
     new_board = Array.new(n) { Array.new(n) { "   " } }
     @queens.keys.each do |quen_pos| 
       row, pos = quen_pos
-      new_board[row][pos] = " Q " 
+      new_board[row][pos] = " Q ".colorize(:red) 
     end
     new_board
   end
 
   def render(solution)
-    col_sep = "|"
+    col_sep = "|".colorize(:blue)
     row_sep = "----" * n + "\n"
     output = []
     solution.each do |row|
@@ -84,11 +84,9 @@ class NQueens
   end
 
   def update_unsafe
-    @unsafe_pos = [] 
-    @queens.keys.each do |queen|
-      @unsafe_pos += attack_positions(queen)
-    end
-    @unsafe_pos.uniq!
+    @unsafe_pos = @queens.keys.inject([]) do |pos, queen| 
+      pos + attack_positions(queen)
+    end.uniq
   end
 
   def attack_positions(position)
@@ -106,7 +104,7 @@ class NQueens
 
     delta.each do |dir|
       next_space = add_pos(dir, position)
-      while in_of_bounds?(next_space)
+      while in_bounds?(next_space)
         attack << next_space
         next_space = add_pos(dir, next_space)
       end
@@ -114,20 +112,21 @@ class NQueens
     attack
   end
 
-  def in_of_bounds?(position)
+  def in_bounds?(position)
     row, col = *position
     (0..(n-1)).include?(row) && (0..(n-1)).include?(col)
   end
 
   def add_pos(pos1, pos2)
-    row1, col1 = *pos1
-    row2, col2 = *pos2
-    [row1 + row2, col1 + col2]
+    [pos1[0] + pos2[0], pos[1] + pos[1]]
   end
 
 end
 
-x =  NQueens.new(10)
 
-x.solve
-x.print_solutions
+(2..8).each do |num|
+  x = NQueens.new(num)
+  x.solve
+  puts x.solutions.length
+end
+
