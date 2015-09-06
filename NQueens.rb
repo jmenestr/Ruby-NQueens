@@ -1,12 +1,15 @@
 require 'colorize'
+require 'set'
+require 'benchmark'
+
 class NQueens
 
   def initialize(n = 8)
     @n = n
-    @board = Array.new(n) { Array.new(n) { " * " } }
+    @board = Array.new(n) { Array.new(n)  }
     @solutions = []
     @queens = {}
-    @unsafe_pos = []
+    @unsafe_pos = Set.new
   end
 
   attr_reader :n, :solutions
@@ -23,7 +26,6 @@ class NQueens
         remove_queen([row, col])
       end
     end
-    @solutions
   end
 
   def [](pos)
@@ -40,7 +42,7 @@ class NQueens
     p @solutions.length
     @solutions.each do |solution|
       print render(solution)
-      print "***"*n + "\n"
+      print "****"*n + "\n"
     end
   end
 
@@ -52,13 +54,11 @@ class NQueens
 
 
   def place_queen(pos)
-    self[pos] = " Q "
     @queens[pos] = attack_positions(pos)
     update_unsafe
   end
 
   def remove_queen(pos)
-    self[pos] = " * "
     @queens.delete(pos)
     update_unsafe
   end
@@ -74,7 +74,7 @@ class NQueens
 
   def render(solution)
     col_sep = "|".colorize(:blue)
-    row_sep = "----" * n + "\n"
+    row_sep = ("----" * n + "\n").colorize(:blue)
     output = []
     solution.each do |row|
       output << [row.join(col_sep) + "\n"]
@@ -84,10 +84,9 @@ class NQueens
   end
 
   def update_unsafe
-    @unsafe_pos = @queens.keys.inject([]) do |pos, queen| 
-      pos + attack_positions(queen)
-    end.uniq
+    @unsafe_pos = Set.new(@queens.values.flatten(1))
   end
+
 
   def attack_positions(position)
     attack = []
@@ -113,20 +112,18 @@ class NQueens
   end
 
   def in_bounds?(position)
-    row, col = *position
+    row, col = position
     (0..(n-1)).include?(row) && (0..(n-1)).include?(col)
   end
 
   def add_pos(pos1, pos2)
-    [pos1[0] + pos2[0], pos[1] + pos[1]]
+    [pos1[0] + pos2[0], pos1[1] + pos2[1]]
   end
 
 end
 
 
-(2..8).each do |num|
-  x = NQueens.new(num)
-  x.solve
-  puts x.solutions.length
-end
+
+
+
 
